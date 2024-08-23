@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>corazonlatiendo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #00274d; /* Azul anochecer por defecto */
+            overflow: hidden; /* Evita el scroll si el contenido se extiende */
+            position: relative; /* Necesario para posicionar el mensaje */
+            color: white; /* Color del texto por defecto */
+            transition: background 1s ease; /* Transición suave para el cambio de fondo */
+        }
+        .heart {
+            height: 200px;
+            width: 200px;
+            background-color: red;
+            position: relative;
+            transform: rotate(45deg);
+            box-shadow: -20px 20px 150px #f20044;
+            animation: palpitar 0.5s linear infinite alternate;
+            cursor: pointer; /* Pointer cursor to indicate clickable */
+            z-index: 1; /* Asegura que el corazón esté detrás de las frases */
+        }
+        .heart-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg); /* Centra el contenido y alinea el texto con el corazón */
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.2; /* Ajusta el espaciado entre líneas */
+            z-index: 1; /* Asegura que el texto esté en la misma capa que el corazón */
+        }
+        .heart-content h1, .heart-content h2 {
+            margin: 0;
+            padding: 0;
+        }
+        .mensaje {
+            display: none; /* Inicialmente oculto */
+            position: absolute;
+            bottom: 20px; /* Ajusta el valor para mover el mensaje más abajo */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Iluminación resaltada */
+            z-index: 2; /* Asegura que el mensaje esté por delante del corazón y frases */
+        }
+        .frase {
+            position: absolute;
+            color: #fff;
+            font-size: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Iluminación resaltada */
+            opacity: 0; /* Inicialmente oculto */
+            transition: opacity 0.5s ease; /* Transición suave para la aparición */
+            z-index: 3; /* Asegura que las frases estén al frente */
+        }
+        .question {
+            position: absolute;
+            bottom: 280px; /* Ajusta el valor para mover la pregunta más arriba */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Iluminación resaltada */
+            z-index: 2; /* Asegura que la pregunta esté por delante del corazón y frases */
+        }
+        .response-buttons {
+            position: absolute;
+            bottom: 180px; /* Ajusta el valor para mover los botones más abajo */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Iluminación resaltada */
+            z-index: 2; /* Asegura que los botones estén por delante del corazón y frases */
+            display: flex;
+            gap: 10px;
+            flex-direction: column; /* Ajusta la dirección de los botones para alinearlos verticalmente */
+        }
+        .response-buttons button {
+            background-color: rgba(255, 255, 255, 0.2); /* Fondo semi-transparente */
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+        .response-buttons button:hover {
+            background-color: rgba(255, 255, 255, 0.5); /* Fondo más claro al pasar el ratón */
+        }
+        @keyframes palpitar {
+            0% {
+                transform: rotate(45deg) scale(1.10);
+            }
+            80% {
+                transform: rotate(45deg) scale(1.0);
+            }
+            100% {
+                transform: rotate(45deg) scale(0.8);
+            }
+        }
+        .heart::before, .heart::after {
+            content: "";
+            position: absolute;
+            height: 200px; /* Ajustado para que el corazón cubra todo el tamaño */
+            width: 200px; /* Ajustado para que el corazón cubra todo el tamaño */
+            background: red;
+            border-radius: 50%;
+            box-shadow: 10px 20px 150px #f20044;
+            z-index: -1; /* Asegura que las sombras están detrás del corazón */
+        }
+        .heart::before {
+            top: -50%;
+        }
+        .heart::after {
+            right: 50%;
+            box-shadow: 20px 20px 150px #f20044;
+        }
+        /* Hide the audio controls */
+        audio {
+            display: none;
+        }
+        /* Estrellas en el fondo */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png') repeat; /* Imagen de estrellas */
+            z-index: 0; /* Debajo del contenido */
+            pointer-events: none; /* No interactuable */
+        }
+        /* Marca de agua */
+        .watermark {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.5); /* Color blanco con opacidad */
+            z-index: 4; /* Por encima del fondo pero debajo del contenido */
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div> <!-- Fondo de estrellas -->
+    <div class="heart" onclick="toggleMusic()">
+        <div class="heart-content">
+            <h1>Te odio</h1>
+            <h2>Ingeniería en Informática</h2>
+        </div>
+    </div>
+    <div class="contenido">
+        <!-- Audio element without controls and initially paused -->
+        <audio id="music" loop>
+            <source src="tu-cancion.mp3" type="audio/mpeg">
+            Tu navegador no soporta la etiqueta de audio.
+        </audio>
+        <!-- Hidden message -->
+        <div class="mensaje">Querido amigo, siempre estaré aquí para ti.</div>
+        <!-- Pregunta y botones de respuesta -->
+        <div class="question" id="question" style="display: none;">¿Qué opinas de este modelo?</div>
+        <div class="response-buttons" id="responseButtons" style="display: none;">
+            <button onclick="handleResponse('bueno')">Está bueno</button>
+            <button onclick="handleResponse('mala')">Es una mierda</button>
+        </div>
+    </div>
+    <!-- Marca de agua -->
+    <div class="watermark">Casimiro Guillermo</div>
+
+    <script>
+        const audio = document.getElementById('music');
+        const mensaje = document.querySelector('.mensaje');
+        const question = document.getElementById('question');
+        const responseButtons = document.getElementById('responseButtons');
+        const body = document.body;
+        let clickCount = 0; // Contador de clics
+        const frases = [
+            "Eres una persona increíble.",
+            "Tu amistad significa el mundo para mí.",
+            "Siempre puedes contar conmigo.",
+            "Tu risa ilumina mi día.",
+            "Aprecio cada momento contigo.",
+            "Eres un amigo muy especial.",
+            "Gracias por estar siempre ahí.",
+            "Eres una inspiración para todos.",
+            "Tu bondad no tiene límites.",
+            "Estoy agradecido por tenerte en mi vida.",
+            "Eres el mejor en lo que haces.",
+            "Siempre estás dispuesto a ayudar.",
+            "Tu energía positiva es contagiosa.",
+            "Eres un verdadero amigo.",
+            "Tu compañía hace todo mejor.",
+            "Aprecio todas nuestras conversaciones.",
+            "Tu apoyo significa todo para mí.",
+            "Eres una persona maravillosa.",
+            "Siempre puedo contar contigo.",
+            "Tu amistad es un regalo.",
+            "Eres una luz en mi vida.",
+            "Gracias por ser un amigo leal.",
+            "Eres una inspiración para todos.",
+            "Siempre me haces sentir especial.",
+            "Tu generosidad es admirable.",
+            "Tu sonrisa ilumina cualquier día.",
+            "Eres una persona con gran corazón.",
+            "Siempre disfruto de tu compañía.",
+            "Tu amabilidad es impresionante.",
+            "Tu apoyo es incondicional.",
+            "Eres un verdadero compañero.",
+            "Tus palabras siempre me alientan.",
+            "Eres una fuente de alegría.",
+            "Tu amistad es una bendición.",
+            "Eres una persona excepcional.",
+            "Siempre puedo contar contigo.",
+            "Tu alegría es contagiosa.",
+            "Eres una inspiración para todos.",
+            "Gracias por ser un amigo leal.",
+            "Eres una persona increíble.",
+            "Tu dedicación es admirable.",
+            "Siempre estás ahí para mí.",
+            "Eres una luz en mi vida.",
+            "Tu amistad es un regalo."
+        ];
+
+        const randomResponses = [
+            "¡Presiona que sí, por favor!",
+            "Vamos, no seas así.",
+            "¡Dale otra oportunidad!",
+            "¿De verdad no te gusta?",
+            "Inténtalo de nuevo.",
+            "Hazlo por mí.",
+            "No te rindas.",
+            "¡Presiona que sí, zorra!",
+            "¿Qué tal si le das otra oportunidad?",
+            "¡Sigue intentándolo!"
+        ];
+
+        const negativeResponses = [
+            "Da",
+            "Presiona sí, estúpida",
+            "¿Qué haces?",
+            "Vamos, presiona sí",
+            "¿En serio?",
+            "Dale otra oportunidad",
+            "¿No te gusta?",
+            "¿No lo ves?",
+            "Presiona sí ya"
+        ];
+
+        let currentFraseIndex = 0;
+        let intervalId;
+        let isFirstClick = true;
+        let isSunrise = false;
+        let isQuestionDisplayed = false;
+        let responseIntervalId; // Intervalo para respuestas aleatorias
+
+        function getRandomPosition() {
+            const x = Math.random() * (window.innerWidth - 200); // 200 es el ancho aproximado del texto
+            const y = Math.random() * (window.innerHeight - 50); // 50 es la altura aproximada del texto
+            // Asegurar que la frase no se superponga con el área del corazón
+            const heartRect = document.querySelector('.heart').getBoundingClientRect();
+            const margin = 250; // Margen alrededor del corazón para evitar superposición
+            if (x < heartRect.left - margin || x > heartRect.right + margin ||
+                y < heartRect.top - margin || y > heartRect.bottom + margin) {
+                return { x, y };
+            }
+            return getRandomPosition(); // Reintentar si está en el área del corazón
+        }
+
+        function createFrase(isFirst) {
+            if (currentFraseIndex >= frases.length) return; // No mostrar más frases si se acabaron
+            let fraseText;
+            if (isFirst) {
+                // Evita que la primera frase sea la que queremos evitar en el centro
+                let availableFrases = frases.filter(f => f !== "Eres una persona increíble.");
+                fraseText = availableFrases[Math.floor(Math.random() * availableFrases.length)];
+            } else {
+                fraseText = frases[currentFraseIndex++];
+            }
+            const frase = document.createElement('div');
+            frase.classList.add('frase');
+            frase.innerText = fraseText;
+            const pos = isFirst ? { x: window.innerWidth / 2 - 75, y: window.innerHeight / 2 - 75 } : getRandomPosition();
+            frase.style.left = `${pos.x}px`;
+            frase.style.top = `${pos.y}px`;
+            document.body.appendChild(frase);
+            // Mostrar la frase con un pequeño retraso
+            setTimeout(() => {
+                frase.style.opacity = 1;
+            }, 10);
+        }
+
+        function handleResponse(response) {
+            if (response === 'mala') {
+                // Mostrar frases aleatorias en un bucle infinito
+                if (responseIntervalId) clearInterval(responseIntervalId); // Limpiar intervalo anterior si existe
+                responseIntervalId = setInterval(() => {
+                    const randomIndex = Math.floor(Math.random() * frases.length);
+                    const frase = document.createElement('div');
+                    frase.classList.add('frase');
+                    frase.innerText = frases[randomIndex];
+                    const pos = getRandomPosition();
+                    frase.style.left = `${pos.x}px`;
+                    frase.style.top = `${pos.y}px`;
+                    document.body.appendChild(frase);
+                    // Mostrar la frase con un pequeño retraso
+                    setTimeout(() => {
+                        frase.style.opacity = 1;
+                    }, 10);
+                }, 2000); // Cambia la frase cada 2 segundos
+
+                // Respuesta aleatoria para "Es una mierda"
+                const randomResponse = negativeResponses[Math.floor(Math.random() * negativeResponses.length)];
+                question.innerText = randomResponse; // Cambia el texto de la pregunta
+                // Reemplazar los botones de respuesta con la respuesta negativa
+                responseButtons.innerHTML = `
+                    <button onclick="handleResponse('bueno')">Está bueno</button>
+                    <button onclick="handleResponse('mala')">Es una mierda</button>
+                `;
+                responseButtons.style.display = 'flex'; // Mostrar los botones
+            } else if (response === 'bueno') {
+                // Detener el bucle de respuestas aleatorias y ocultar la pregunta
+                if (responseIntervalId) clearInterval(responseIntervalId);
+                question.style.display = 'none';
+                responseButtons.style.display = 'none';
+            }
+        }
+
+        function toggleMusic() {
+            clickCount++; // Incrementar contador de clics
+            if (audio.paused) {
+                audio.play();
+                mensaje.style.display = 'block'; // Mostrar el mensaje cuando se reproduce la música
+                if (intervalId) clearInterval(intervalId); // Limpiar intervalo anterior si existe
+                intervalId = setInterval(() => createFrase(false), 2000); // Crear una nueva frase cada 2 segundos
+                if (isFirstClick) {
+                    createFrase(true); // Crear una frase aleatoria en el medio en el primer clic
+                    isFirstClick = false; // Evitar que se vuelva a colocar en el medio
+                }
+                if (clickCount >= 10) {
+                    if (!isSunrise) {
+                        body.style.background = '#FF6F00'; // Amanecer naranja
+                        isSunrise = true; // Actualiza el estado del fondo
+                    }
+                } else {
+                    body.style.background = '#00274d'; // Azul anochecer
+                }
+                body.style.background += " url('https://www.transparenttextures.com/patterns/stardust.png') repeat"; // Fondo de estrellas
+                if (!isQuestionDisplayed && !isSunrise) {
+                    // Mostrar la pregunta y botones si no se ha mostrado antes
+                    question.style.display = 'block';
+                    responseButtons.style.display = 'flex';
+                    isQuestionDisplayed = true;
+                }
+            } else {
+                // La música no se detiene, solo reinicia el índice de frases si es necesario
+                mensaje.style.display = 'none'; // Ocultar el mensaje cuando se pausa la música
+                // No detener la música y no eliminar frases
+            }
+        }
+    </script>
+</body>
+</html>
